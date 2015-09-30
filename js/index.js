@@ -1,14 +1,47 @@
 $(document).ready(function() {
-	var csv;
-		$.ajax({
-	    url: "pathto/filename.csv",
-	    async: false,
-	    success: function (csvd) {
-	        csv = $.csv.toArray(csvd);
-	    },
-	    dataType: "text",
-	    complete: function () {
-	        console.log(csv);
-	    }
+	var file;
+	$('#file').change(function() {
+		file = $(this).get(0).files[0];
+		Papa.parse(file, {
+			header: true,
+			complete: function(object) {
+				construct(object);
+			}
+		});
 	});
+
+	function construct(object) {
+		var level1 = [];
+		var output = [];
+		//1 level
+		$.each(object.data, function (index, item) {
+			if ($.inArray(item.level1, level1) == -1) {
+				level1.push(item.level1);
+			}
+		});
+		//layout
+		$('<ul></ul>').appendTo('#csv_to_html');
+		for (var i = 0; i < level1.length; i++) {
+			if (level1[i] != "" && level1[i] != undefined) {
+				var level2 = [];
+				$('<li id="'+level1[i]+'">'+level1[i]+'</li>').appendTo('#csv_to_html > ul');
+				$('<ul></ul>').appendTo('#csv_to_html ul li#'+level1[i]);
+				//2 level
+				$.each(object.data, function (index, item) {
+					if (item.level1 == level1[i] && $.inArray(item.level2, level2) == -1) {
+						level2.push(item.level2);
+						$('<li id="'+item.level2+'">'+item.level2+'</li>').appendTo('#csv_to_html ul > li#'+level1[i]+' ul');
+					}
+				});
+			}
+		}
+		//table
+		for (var i = 0; i < level1.length; i++) {
+			if (level1[i] != "" && level1[i] != undefined) {
+				$.each(object.data, function (index, item) {
+					$('#csv_to_html ul li#'+level1[i]+' ul li#'+item.level2).append(item.name);
+				});
+			}
+		}
+	}
 });
