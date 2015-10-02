@@ -1,13 +1,11 @@
 $(document).ready(function() {
-	var file;
-	$('#file').change(function() {
-		file = $(this).get(0).files[0];
-		Papa.parse(file, {
-			header: true,
-			complete: function(object) {
-				construct(object);
-			}
-		});
+	Papa.parse('/csv.csv', {
+		download: true,
+		header: true,
+		complete: function(object) {
+			console.log(object);
+			construct(object);
+		}
 	});
 
 	function construct(object) {
@@ -20,17 +18,20 @@ $(document).ready(function() {
 			}
 		});
 		//layout
-		$('<ul></ul>').appendTo('#csv_to_html');
+		$('<div></div>').appendTo('#csv_to_html');
 		for (var i = 0; i < level1.length; i++) {
+			$('<input id="ac-'+i+'" name="accordion-'+i+'" type="radio" />
+				<label for="ac-'+i+'">'+level1[i]+'</label>
+				<article class="ac-medium"></article>').appendTo('#csv_to_html > div');
 			if (level1[i] != "" && level1[i] != undefined) {
 				var level2 = [];
-				$('<li id="'+level1[i]+'">'+level1[i]+'</li>').appendTo('#csv_to_html > ul');
-				$('<ul></ul>').appendTo('#csv_to_html ul li#'+level1[i]);
 				//2 level
 				$.each(object.data, function (index, item) {
 					if (item.level1 == level1[i] && $.inArray(item.level2, level2) == -1) {
 						level2.push(item.level2);
-						$('<li id="'+item.level2+'">'+item.level2+'</li>').appendTo('#csv_to_html ul > li#'+level1[i]+' ul');
+						$('<input id="ac-'+i+'-'+index+'" name="accordion-'+i+'" type="radio" />
+				<label for="ac-'+i+'">'+level1[i]+'</label>
+						<article class="ac-small"></article>').appendTo('#csv_to_html > div > .ac-medium:last-child');
 					}
 				});
 			}
